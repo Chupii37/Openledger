@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Display a message in cyan color
-echo -e "\033[36mShowing ANIANI!!!\033[0m" 
+echo -e "\033[36mShowing ANIANI!!!\033[0m"
 
 # Display the message and fetch the logo from the provided URL
 echo -e "\033[32mMenampilkan logo...\033[0m"
@@ -36,35 +36,32 @@ else
     echo -e "\033[32mUnzip is already installed.\033[0m"
 fi
 
-# Step 4: Install necessary libraries for X11 forwarding and GUI applications
-echo -e "\033[33mInstalling required dependencies for GUI...\033[0m"
-sudo apt install -y \
-    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
-    xdg-utils libatspi2.0-0 libsecret-1-0 \
-    xorg x11-apps
-
-# Step 5: Create a folder for openledger-node and change into that directory
+# Step 4: Create a folder for openledger-node and change into that directory
 echo -e "\033[33mCreating the openledger-node directory...\033[0m"
 mkdir -p openledger-node
 cd openledger-node
 
-# Step 6: Download the openledger-node-1.0.0-linux.zip file
+# Step 5: Download the openledger-node-1.0.0-linux.zip file
 echo -e "\033[33mDownloading openledger-node-1.0.0-linux.zip...\033[0m"
 wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
 
-# Step 7: Unzip the downloaded file
+# Step 6: Unzip the downloaded file
 echo -e "\033[33mUnzipping openledger-node-1.0.0-linux.zip...\033[0m"
 unzip -o openledger-node-1.0.0-linux.zip
 
-# Step 8: Install the .deb package
+# Step 7: Install the .deb package
 echo -e "\033[33mInstalling the openledger-node .deb package...\033[0m"
 sudo dpkg -i openledger-node-1.0.0.deb
 
-# Step 9: Fix any missing dependencies
+# Step 8: Fix any missing dependencies
 echo -e "\033[33mFixing dependencies...\033[0m"
 sudo apt-get install -f
 
-# Step 10: Create a Dockerfile with X11 forwarding setup
+# Step 9: Allow Docker to access X11 server (necessary for GUI applications)
+echo -e "\033[33mAllowing Docker to access X11 server...\033[0m"
+xhost +local:docker
+
+# Step 10: Create Dockerfile
 echo -e "\033[33mCreating Dockerfile...\033[0m"
 cat > Dockerfile <<EOL
 # Use an official Ubuntu as a base image
@@ -73,11 +70,22 @@ FROM ubuntu:20.04
 # Set environment variables to disable interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update package list and install dependencies
+# Install necessary dependencies
 RUN apt-get update && apt-get install -y \
-    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
-    xdg-utils libatspi2.0-0 libsecret-1-0 \
-    wget unzip x11-apps \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    unzip \
+    sudo \
+    lsb-release \
+    libgtk-3-0 \
+    libnotify4 \
+    libnss3 \
+    libxss1 \
+    libxtst6 \
+    xdg-utils \
+    libatspi2.0-0 \
+    libsecret-1-0 \
     && apt-get clean
 
 # Set the working directory to /opt/ubuntu-node in the container
@@ -92,11 +100,8 @@ RUN unzip openledger-node-1.0.0-linux.zip && rm openledger-node-1.0.0-linux.zip
 # Install the node by installing the .deb package
 RUN dpkg -i openledger-node-1.0.0.deb && apt-get install -f
 
-# Set environment variable to allow X11 forwarding
-ENV DISPLAY=:0
-
-# Start the node (adjust the command if necessary, this assumes the node starts via systemctl or other command)
-CMD ["openledger-node", "start"]
+# Allow running OpenLedger Node as root by using --no-sandbox
+CMD ["./openledger-node", "--no-sandbox"]
 EOL
 
 # Step 11: Display success message for Dockerfile creation
@@ -106,17 +111,9 @@ echo -e "\033[32mDockerfile created successfully!\033[0m"
 echo -e "\033[33mBuilding Docker image...\033[0m"
 docker build -t openledger-node-x11 .
 
-# Step 13: Allow Docker containers to access the host's X11 server
-echo -e "\033[33mAllowing Docker to access X11 server...\033[0m"
-xhost +local:docker
-
-# Step 14: Run the OpenLedger Node container with X11 forwarding enabled
+# Step 13: Run the OpenLedger Node container with X11 forwarding and auto-restart
 echo -e "\033[33mStarting OpenLedger Node container with X11 forwarding...\033[0m"
-docker run -d \
-    --name openledger-node-x11 \
-    -e DISPLAY=$DISPLAY \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
-    openledger-node-x11
+docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -d --name openledger-node-x11 --restart unless-stopped openledger-node-x11
 
 # Final success message
-echo -e "\033[32mOpenLedger Node is now running with X11 forwarding!\033[0m"
+echo -e "\033[32mOpenLedger Node has been installed and is running with X11 forwarding and auto-restart!\033[0m"
