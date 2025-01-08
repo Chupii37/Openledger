@@ -43,8 +43,18 @@ fi
 echo -e "\033[33mDownloading and installing OpenLedger Node...\033[0m"
 wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip -P /tmp/
 unzip /tmp/openledger-node-1.0.0-linux.zip -d /tmp/
-sudo dpkg -i /tmp/openledger-node-1.0.0/openledger-node-1.0.0.deb
-sudo apt-get install -f
+
+# Find the .deb file after extraction and install it
+DEB_FILE=$(find /tmp -name "openledger-node-*.deb" | head -n 1)
+
+if [ -z "$DEB_FILE" ]; then
+    echo -e "\033[31mNo .deb file found. Exiting...\033[0m"
+    exit 1
+else
+    echo -e "\033[32mFound .deb file: $DEB_FILE\033[0m"
+    sudo dpkg -i "$DEB_FILE"
+    sudo apt-get install -f
+fi
 
 # Step 5: Allow Docker to access X11 server for GUI applications
 echo -e "\033[33mAllowing Docker to access the X11 server...\033[0m"
