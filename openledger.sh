@@ -58,18 +58,56 @@ fi
 
 # Step 5: Allow Docker to access X11 server for GUI applications
 echo -e "\033[33mAllowing Docker to access the X11 server...\033[0m"
-# Ensuring MobaXterm X11 server is listening and accessible
+# Ensuring MobaXterm X11 server is listening and accessible (if using Windows)
 xhost +localhost
 
-# Step 6: Run OpenLedger Node container with X11 forwarding via MobaXterm
+# Step 6: Check if the OpenLedger Node Docker image exists
+echo -e "\033[33mChecking for the OpenLedger Node Docker image...\033[0m"
+if ! docker image inspect openledger-node-x11:latest &> /dev/null; then
+    echo -e "\033[31mDocker image 'openledger-node-x11:latest' not found.\033[0m"
+    echo -e "Building the Docker image now..."
+
+    # Step 6.1: Create Dockerfile and build the image if it's missing
+    echo -e "\033[33mCreating a Dockerfile and building the image...\033[0m"
+    cat <<EOF > Dockerfile
+# Use a base image, such as Ubuntu
+FROM ubuntu:20.04
+
+# Install dependencies
+RUN apt update && apt install -y \
+    wget \
+    unzip \
+    x11-apps \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    docker.io
+
+# Install Docker
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" > /etc/apt/sources.list.d/docker.list && \
+    apt update && apt install -y docker-ce
+
+# Expose necessary ports and set entry point
+EXPOSE 8080
+CMD ["your-command-to-start-openledger-node"]
+EOF
+
+    # Build the Docker image from the created Dockerfile
+    docker build -t openledger-node-x11 .
+else
+    echo -e "\033[32mDocker image 'openledger-node-x11:latest' found.\033[0m"
+fi
+
+# Step 7: Run OpenLedger Node container with X11 forwarding via MobaXterm
 echo -e "\033[33mStarting OpenLedger Node container with X11 forwarding...\033[0m"
 docker run -d --name openledger-node-x11 \
-    --env DISPLAY=host.docker.internal:0 \
+    --env DISPLAY=host.docker.internal:0 \  # Use `host.docker.internal:0` for Docker Desktop (Windows/Mac)
     --volume /tmp/.X11-unix:/tmp/.X11-unix \
     --network host \
     openledger-node-x11:latest
 
-# Step 7: Confirm Docker container is running
+# Step 8: Confirm Docker container is running
 echo -e "\033[33mChecking if OpenLedger Node container is running...\033[0m"
 docker ps
 
