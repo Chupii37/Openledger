@@ -89,16 +89,19 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # Set working directory in Docker
-WORKDIR /opt/OpenLedger\ Node
+WORKDIR /opt
 
-# Copy the OpenLedger Node files into Docker image
-COPY openledger-node-1.0.0-linux.zip /opt/OpenLedger\ Node/
+# Step 1: Copy the zip file into the container
+COPY openledger-node-1.0.0-linux.zip /opt/
 
-# Unzip the OpenLedger Node zip file inside the container
+# Step 2: Unzip the OpenLedger Node zip file
 RUN unzip openledger-node-1.0.0-linux.zip && rm openledger-node-1.0.0-linux.zip
 
-# Install the OpenLedger Node .deb package
-RUN dpkg -i openledger-node-1.0.0.deb && apt-get install -f
+# Step 3: Install the OpenLedger Node .deb package
+RUN dpkg -i /opt/openledger-node-1.0.0/openledger-node-1.0.0.deb && apt-get install -f
+
+# Step 4: Check and confirm that the directory exists after installation
+RUN ls -l /opt && echo "OpenLedger Node installed successfully!"
 
 # Expose X11 socket to allow GUI applications to run
 RUN apt-get update && apt-get install -y x11-apps
@@ -107,7 +110,7 @@ RUN apt-get update && apt-get install -y x11-apps
 RUN echo "xhost +local:docker" > ~/.bashrc
 
 # Command to start the OpenLedger Node
-CMD ["/opt/OpenLedger Node/openledger-node", "--no-sandbox"]
+CMD ["/opt/openledger-node-1.0.0/openledger-node", "--no-sandbox"]
 EOL
 
 # Step 11: Build the Docker image
