@@ -49,7 +49,15 @@ wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
 echo -e "\033[33mUnzipping openledger-node-1.0.0-linux.zip...\033[0m"
 unzip -o openledger-node-1.0.0-linux.zip
 
-# Step 7: Create a Dockerfile
+# Step 7: Install the .deb package
+echo -e "\033[33mInstalling the openledger-node .deb package...\033[0m"
+sudo dpkg -i openledger-node-1.0.0.deb
+
+# Step 8: Fix any missing dependencies
+echo -e "\033[33mFixing dependencies...\033[0m"
+sudo apt-get install -f
+
+# Step 9: Create a Dockerfile
 echo -e "\033[33mCreating Dockerfile...\033[0m"
 cat > Dockerfile <<EOL
 # Use an official Ubuntu as a base image
@@ -77,21 +85,21 @@ COPY openledger-node-1.0.0-linux.zip /opt/ubuntu-node/
 # Unzip the downloaded zip file inside the container
 RUN unzip openledger-node-1.0.0-linux.zip && rm openledger-node-1.0.0-linux.zip
 
-# Install the node by running the install script
-RUN chmod +x install.sh && ./install.sh
+# Install the node by installing the .deb package
+RUN dpkg -i openledger-node-1.0.0.deb && apt-get install -f
 
 # Start the node (adjust this to your actual start command)
 CMD ["./start-node.sh"]
 EOL
 
-# Step 8: Display success message for Dockerfile creation
+# Step 10: Display success message for Dockerfile creation
 echo -e "\033[32mDockerfile created successfully!\033[0m"
 
-# Step 9: Build the Docker image from the Dockerfile
+# Step 11: Build the Docker image from the Dockerfile
 echo -e "\033[33mBuilding Docker image...\033[0m"
 docker build -t openledger-node .
 
-# Step 10: Run the OpenLedger Node container with auto-restart policy
+# Step 12: Run the OpenLedger Node container with auto-restart policy
 echo -e "\033[33mStarting OpenLedger Node container with auto-restart...\033[0m"
 docker run -d --name openledger-node --restart unless-stopped openledger-node
 
