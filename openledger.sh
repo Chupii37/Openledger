@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y \\
     ca-certificates \\
     curl \\
     unzip \\
+    wget \\
     sudo \\
     lsb-release \\
     libgtk-3-0 \\
