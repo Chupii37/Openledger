@@ -36,9 +36,12 @@ else
     echo -e "\033[32mUnzip is already installed.\033[0m"
 fi
 
-# Step 4: Install missing dependencies on the host machine
-echo -e "\033[33mInstalling missing dependencies on host machine...\033[0m"
-sudo apt-get install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils libatspi2.0-0 libsecret-1-0
+# Step 4: Install necessary libraries for X11 forwarding and GUI applications
+echo -e "\033[33mInstalling required dependencies for GUI...\033[0m"
+sudo apt install -y \
+    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
+    xdg-utils libatspi2.0-0 libsecret-1-0 \
+    xorg x11-apps
 
 # Step 5: Create a folder for openledger-node and change into that directory
 echo -e "\033[33mCreating the openledger-node directory...\033[0m"
@@ -61,7 +64,7 @@ sudo dpkg -i openledger-node-1.0.0.deb
 echo -e "\033[33mFixing dependencies...\033[0m"
 sudo apt-get install -f
 
-# Step 10: Create a Dockerfile
+# Step 10: Create a Dockerfile with X11 forwarding setup
 echo -e "\033[33mCreating Dockerfile...\033[0m"
 cat > Dockerfile <<EOL
 # Use an official Ubuntu as a base image
@@ -72,20 +75,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update package list and install dependencies
 RUN apt-get update && apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    unzip \
-    sudo \
-    lsb-release \
-    libgtk-3-0 \
-    libnotify4 \
-    libnss3 \
-    libxss1 \
-    libxtst6 \
-    xdg-utils \
-    libatspi2.0-0 \
-    libsecret-1-0 \
+    libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 \
+    xdg-utils libatspi2.0-0 libsecret-1-0 \
+    wget unzip x11-apps \
     && apt-get clean
 
 # Set the working directory to /opt/ubuntu-node in the container
@@ -100,8 +92,11 @@ RUN unzip openledger-node-1.0.0-linux.zip && rm openledger-node-1.0.0-linux.zip
 # Install the node by installing the .deb package
 RUN dpkg -i openledger-node-1.0.0.deb && apt-get install -f
 
-# Start the node (adjust this to your actual start command)
-CMD ["./start-node.sh"]
+# Set environment variable to allow X11 forwarding
+ENV DISPLAY=:0
+
+# Start the node (adjust the command if necessary, this assumes the node starts via systemctl or other command)
+CMD ["openledger-node", "start"]
 EOL
 
 # Step 11: Display success message for Dockerfile creation
@@ -109,11 +104,19 @@ echo -e "\033[32mDockerfile created successfully!\033[0m"
 
 # Step 12: Build the Docker image from the Dockerfile
 echo -e "\033[33mBuilding Docker image...\033[0m"
-docker build -t openledger-node .
+docker build -t openledger-node-x11 .
 
-# Step 13: Run the OpenLedger Node container with auto-restart policy
-echo -e "\033[33mStarting OpenLedger Node container with auto-restart...\033[0m"
-docker run -d --name openledger-node --restart unless-stopped openledger-node
+# Step 13: Allow Docker containers to access the host's X11 server
+echo -e "\033[33mAllowing Docker to access X11 server...\033[0m"
+xhost +local:docker
+
+# Step 14: Run the OpenLedger Node container with X11 forwarding enabled
+echo -e "\033[33mStarting OpenLedger Node container with X11 forwarding...\033[0m"
+docker run -d \
+    --name openledger-node-x11 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    openledger-node-x11
 
 # Final success message
-echo -e "\033[32mOpenLedger Node has been installed and is running with auto-restart!\033[0m"
+echo -e "\033[32mOpenLedger Node is now running with X11 forwarding!\033[0m"
