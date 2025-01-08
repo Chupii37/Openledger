@@ -88,32 +88,38 @@ RUN apt-get update && apt-get install -y \
     libsecret-1-0 \
     && apt-get clean
 
-# Set the working directory to /opt/ubuntu-node in the container
-WORKDIR /opt/ubuntu-node
+# Set working directory in Docker
+WORKDIR /opt/OpenLedger\ Node
 
-# Copy the openledger-node-1.0.0-linux.zip file from the host into the container
-COPY openledger-node-1.0.0-linux.zip /opt/ubuntu-node/
+# Copy the OpenLedger Node files into Docker image
+COPY openledger-node-1.0.0-linux.zip /opt/OpenLedger\ Node/
 
-# Unzip the downloaded zip file inside the container
+# Unzip the OpenLedger Node zip file inside the container
 RUN unzip openledger-node-1.0.0-linux.zip && rm openledger-node-1.0.0-linux.zip
 
-# Install the node by installing the .deb package
+# Install the OpenLedger Node .deb package
 RUN dpkg -i openledger-node-1.0.0.deb && apt-get install -f
 
-# Allow running OpenLedger Node as root by using --no-sandbox
-CMD ["./openledger-node", "--no-sandbox"]
+# Expose X11 socket to allow GUI applications to run
+RUN apt-get update && apt-get install -y x11-apps
+
+# Allow Docker to access X11 server
+RUN echo "xhost +local:docker" > ~/.bashrc
+
+# Command to start the OpenLedger Node
+CMD ["/opt/OpenLedger Node/openledger-node", "--no-sandbox"]
 EOL
 
-# Step 11: Display success message for Dockerfile creation
-echo -e "\033[32mDockerfile created successfully!\033[0m"
-
-# Step 12: Build the Docker image from the Dockerfile
+# Step 11: Build the Docker image
 echo -e "\033[33mBuilding Docker image...\033[0m"
 docker build -t openledger-node-x11 .
 
-# Step 13: Run the OpenLedger Node container with X11 forwarding and auto-restart
+# Step 12: Allow Docker to access X11 server (ensure permissions for local connections)
+echo -e "\033[33mAllowing Docker to access X11 server...\033[0m"
+xhost +local:docker
+
+# Step 13: Start the Docker container with X11 forwarding
 echo -e "\033[33mStarting OpenLedger Node container with X11 forwarding...\033[0m"
 docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -d --name openledger-node-x11 --restart unless-stopped openledger-node-x11
 
-# Final success message
 echo -e "\033[32mOpenLedger Node has been installed and is running with X11 forwarding and auto-restart!\033[0m"
