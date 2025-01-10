@@ -11,9 +11,6 @@ RESET='\033[0m'
 # Display a message in cyan color
 echo -e "${CYAN}Starting openledger setup script...${RESET}"
 
-# Display a message in cyan color
-echo -e "\033[36mShowing ANIANI!!!\033[0m"
-
 # Display the message and fetch the logo from the provided URL
 echo -e "${GREEN}Menampilkan logo...${RESET}"
 wget -qO- https://raw.githubusercontent.com/Chupii37/Chupii-Node/refs/heads/main/Logo.sh | bash
@@ -66,20 +63,20 @@ sudo apt install -y \
     docker.io \
     lxde \
     ffmpeg \
-    libasound2 \
+    libasound2t64 \
     libxss1 \
     libappindicator3-1 \
     libnss3 \
     libgtk-3-0 \
     libx11-xcb1 \
     libxtst6 \
-    libgconf-2-4 \
-    libva1 \
-    libjsoncpp1 \
+    libgnome2-0 \
+    libva2 \
+    libjsoncpp-dev \
     libssl-dev \
     libcurl4-openssl-dev \
     libgl1-mesa-glx \
-    libvpx6 \
+    libvpx-dev \
     mesa-utils
 
 # Run the docker setup
@@ -104,20 +101,20 @@ RUN apt-get update && apt-get install -y \\
     docker.io \\
     lxde \\
     ffmpeg \\
-    libasound2 \\
+    libasound2t64 \\
     libxss1 \\
     libappindicator3-1 \\
     libnss3 \\
     libgtk-3-0 \\
     libx11-xcb1 \\
     libxtst6 \\
-    libgconf-2-4 \\
-    libva1 \\
-    libjsoncpp1 \\
+    libgnome2-0 \\
+    libva2 \\
+    libjsoncpp-dev \\
     libssl-dev \\
     libcurl4-openssl-dev \\
     libgl1-mesa-glx \\
-    libvpx6 \\
+    libvpx-dev \\
     mesa-utils \\
     && rm -rf /var/lib/apt/lists/*
 
@@ -154,10 +151,10 @@ services:
     environment:
       - DISPLAY=${DISPLAY}  # Pass the display variable to the container
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix  
-    network_mode: host  
-    privileged: true  
-    shm_size: '2gb'  
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Mount X11 socket to forward the display
+    network_mode: host  # Ensure we can forward to the host's X11 server
+    privileged: true  # Needed for Docker to work inside Docker if required
+    shm_size: '2gb'  # Shared memory size for GUI apps
     stdin_open: true
     tty: true
 EOF
