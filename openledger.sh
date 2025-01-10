@@ -70,14 +70,13 @@ sudo apt install -y \
     libgtk-3-0 \
     libx11-xcb1 \
     libxtst6 \
-    libgnome2-0 \
-    libva2 \
+    libvpx-dev \
+    mesa-utils \
     libjsoncpp-dev \
     libssl-dev \
     libcurl4-openssl-dev \
-    libgl1-mesa-glx \
-    libvpx-dev \
-    mesa-utils
+    libva2 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Run the docker setup
 echo -e "${GREEN}Running Docker setup...${RESET}"
@@ -108,14 +107,12 @@ RUN apt-get update && apt-get install -y \\
     libgtk-3-0 \\
     libx11-xcb1 \\
     libxtst6 \\
-    libgnome2-0 \\
-    libva2 \\
+    libvpx-dev \\
+    mesa-utils \\
     libjsoncpp-dev \\
     libssl-dev \\
     libcurl4-openssl-dev \\
-    libgl1-mesa-glx \\
-    libvpx-dev \\
-    mesa-utils \\
+    libva2 \\
     && rm -rf /var/lib/apt/lists/*
 
 # Create directory to store downloaded files (file-dock)
