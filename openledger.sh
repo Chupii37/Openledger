@@ -154,10 +154,10 @@ services:
     environment:
       - DISPLAY=${DISPLAY}  # Pass the display variable to the container
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix  # Mount X11 socket to forward the display
-    network_mode: host  # Ensure we can forward to the host's X11 server
-    privileged: true  # Needed for Docker to work inside Docker if required
-    shm_size: '2gb'  # Shared memory size for GUI apps
+      - /tmp/.X11-unix:/tmp/.X11-unix  
+    network_mode: host  
+    privileged: true  
+    shm_size: '2gb'  
     stdin_open: true
     tty: true
 EOF
