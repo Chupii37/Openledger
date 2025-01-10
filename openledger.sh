@@ -8,26 +8,20 @@ RED='\033[31m'
 MAGENTA='\033[35m'
 RESET='\033[0m'
 
-# Display a message in cyan color
-echo -e "${CYAN}Starting openledger setup script...${RESET}"
-
 # Display the message and fetch the logo from the provided URL
 echo -e "${GREEN}Menampilkan logo...${RESET}"
 wget -qO- https://raw.githubusercontent.com/Chupii37/Chupii-Node/refs/heads/main/Logo.sh | bash
 
-# Check for system updates and upgrade
-echo -e "${YELLOW}Checking system updates and upgrading...${RESET}"
-sudo apt update && sudo apt upgrade -y
-
-# Check if Docker is installed
-echo -e "${YELLOW}Checking if Docker is installed...${RESET}"
-if ! command -v docker &> /dev/null
-then
-    echo -e "${RED}Docker not found, installing...${RESET}"
-    sudo apt install docker.io -y
-else
-    echo -e "${GREEN}Docker is already installed.${RESET}"
-fi
+sudo apt update
+sudo apt upgrade -y
+sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io -y
+docker --version
+sudo systemctl start docker
+sudo systemctl enable docker
 
 # Check if Docker Compose is installed
 echo -e "${YELLOW}Checking if Docker Compose is installed...${RESET}"
