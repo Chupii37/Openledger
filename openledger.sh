@@ -102,7 +102,7 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install necessary dependencies
+# Install required packages
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -124,27 +124,23 @@ RUN apt-get update && apt-get install -y \
     libjsoncpp-dev \
     libssl-dev \
     libcurl4-openssl-dev \
-    libva2 \
-    && rm -rf /var/lib/apt/lists/*
+    libva2 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Create /file-dock directory for downloading files
-RUN mkdir -p /file-dock
-RUN ls -l /file-dock  # Debugging step
+# Creating the working directory and downloading the file
+RUN mkdir -p /file-dock && \
+    wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip && \
+    unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock
 
-# Download and unzip openledger-node package
-RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
-RUN ls -l /file-dock  # Debugging step to check if file is downloaded
-
-RUN unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock
-RUN ls -l /file-dock  # Debugging step to check if unzip works
-
-# Install the .deb package
-RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb || apt --fix-broken install -y
+# Install the .deb package and fix broken dependencies
+RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb && apt --fix-broken install -y
 
 WORKDIR /file-dock
 
+# Setting the entrypoint to the openledger-node executable
 ENTRYPOINT ["openledger-node", "--no-sandbox", "--disable-gpu"]
 CMD ["./openledger-node"]
+
 
 # Create Docker Compose file with volume and user customization
 echo -e "${GREEN}Creating Docker Compose file...${RESET}"
