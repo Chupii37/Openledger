@@ -102,6 +102,7 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install necessary dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -111,40 +112,39 @@ RUN apt-get update && apt-get install -y \
     sudo \
     lxde \
     ffmpeg \
-    libasound2 \\
-    libxss1 \\
-    libappindicator3-1 \\
-    libnss3 \\
-    libgtk-3-0 \\
-    libx11-xcb1 \\
-    libxtst6 \\
-    libvpx-dev \\
-    mesa-utils \\
-    libjsoncpp-dev \\
-    libssl-dev \\
-    libcurl4-openssl-dev \\
+    libasound2t64 \
+    libxss1 \
+    libappindicator3-1 \
+    libnss3 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libxtst6 \
+    libvpx-dev \
+    mesa-utils \
+    libjsoncpp-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
     libva2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create directory and download the zip file
+# Create /file-dock directory for downloading files
 RUN mkdir -p /file-dock
-RUN ls -l /file-dock  
+RUN ls -l /file-dock  # Debugging step
+
+# Download and unzip openledger-node package
 RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
-RUN unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock || echo "Failed to unzip openledger-node.zip"
+RUN ls -l /file-dock  # Debugging step to check if file is downloaded
 
-# List the contents of /file-dock to verify the .deb file exists
-RUN ls -l /file-dock
+RUN unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock
+RUN ls -l /file-dock  # Debugging step to check if unzip works
 
-# Install the .deb file if it exists
-RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb || echo "Failed to install openledger-node-1.0.0-linux.deb"
-
-# Fix broken dependencies if necessary
-RUN apt --fix-broken install -y || echo "Failed to fix broken packages"
+# Install the .deb package
+RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb || apt --fix-broken install -y
 
 WORKDIR /file-dock
+
 ENTRYPOINT ["openledger-node", "--no-sandbox", "--disable-gpu"]
 CMD ["./openledger-node"]
-EOF
 
 # Create Docker Compose file with volume and user customization
 echo -e "${GREEN}Creating Docker Compose file...${RESET}"
