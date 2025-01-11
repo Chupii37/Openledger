@@ -128,7 +128,8 @@ RUN apt-get update && apt-get install -y \
 
 # Create directory and download the zip file
 RUN mkdir -p /file-dock
-RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip || echo "Failed to download openledger-node.zip"
+RUN ls -l /file-dock  
+RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
 RUN unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock || echo "Failed to unzip openledger-node.zip"
 
 # List the contents of /file-dock to verify the .deb file exists
