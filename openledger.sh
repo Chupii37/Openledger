@@ -102,16 +102,16 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \\
-    wget \\
-    curl \\
-    unzip \\
-    xorg \\
-    xvfb \\
-    sudo \\
-    lxde \\
-    ffmpeg \\
-    libasound2t64 \\
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    unzip \
+    xorg \
+    xvfb \
+    sudo \
+    lxde \
+    ffmpeg \
+    libasound2 \\
     libxss1 \\
     libappindicator3-1 \\
     libnss3 \\
@@ -123,7 +123,7 @@ RUN apt-get update && apt-get install -y \\
     libjsoncpp-dev \\
     libssl-dev \\
     libcurl4-openssl-dev \\
-    libva2 \\
+    libva2 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /file-dock
