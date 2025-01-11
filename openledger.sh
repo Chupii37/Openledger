@@ -102,34 +102,34 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required packages
-RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    unzip \
-    xorg \
-    xvfb \
-    sudo \
-    lxde \
-    ffmpeg \
-    libasound2t64 \
-    libxss1 \
-    libappindicator3-1 \
-    libnss3 \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libxtst6 \
-    libvpx-dev \
-    mesa-utils \
-    libjsoncpp-dev \
-    libssl-dev \
-    libcurl4-openssl-dev \
-    libva2 && \
-    rm -rf /var/lib/apt/lists/*
+# Install dependencies
+RUN apt-get update && apt-get install -y \\
+    wget \\
+    curl \\
+    unzip \\
+    xorg \\
+    xvfb \\
+    sudo \\
+    lxde \\
+    ffmpeg \\
+    libasound2t64 \\
+    libxss1 \\
+    libappindicator3-1 \\
+    libnss3 \\
+    libgtk-3-0 \\
+    libx11-xcb1 \\
+    libxtst6 \\
+    libvpx-dev \\
+    mesa-utils \\
+    libjsoncpp-dev \\
+    libssl-dev \\
+    libcurl4-openssl-dev \\
+    libva2 \\
+    && rm -rf /var/lib/apt/lists/*
 
-# Creating the working directory and downloading the file
-RUN mkdir -p /file-dock && \
-    wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip && \
+# Create working directory and download the file
+RUN mkdir -p /file-dock && \\
+    wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip && \\
     unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock
 
 # Install the .deb package and fix broken dependencies
@@ -140,7 +140,7 @@ WORKDIR /file-dock
 # Setting the entrypoint to the openledger-node executable
 ENTRYPOINT ["openledger-node", "--no-sandbox", "--disable-gpu"]
 CMD ["./openledger-node"]
-
+EOF
 
 # Create Docker Compose file with volume and user customization
 echo -e "${GREEN}Creating Docker Compose file...${RESET}"
@@ -153,7 +153,7 @@ services:
     container_name: openledger-docker
     environment:
       - DISPLAY=${DISPLAY}
-      - OPENLEDGER_VERSION=${OPENLEDGER_VERSION:-1.0.0}
+      - OPENLEDGER_VERSION=\${OPENLEDGER_VERSION:-1.0.0}
     volumes:
       - openledger_data:/file-dock/data
       - /tmp/.X11-unix:/tmp/.X11-unix
