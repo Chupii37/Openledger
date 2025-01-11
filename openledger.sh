@@ -127,10 +127,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /file-dock
-RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip && \\
-    unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock
+RUN wget -P /file-dock https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip || handle_error "Failed to download openledger-node.zip"
+RUN unzip /file-dock/openledger-node-1.0.0-linux.zip -d /file-dock || handle_error "Failed to unzip openledger-node.zip"
 
-RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb && apt --fix-broken install -y
+# Check if the .deb file exists
+RUN ls -l /file-dock/ || handle_error "Failed to list contents of /file-dock"
+RUN dpkg -i /file-dock/openledger-node-1.0.0-linux.deb || handle_error "Failed to install openledger-node-1.0.0-linux.deb"
+RUN apt --fix-broken install -y || handle_error "Failed to fix broken packages after installing .deb file"
 
 WORKDIR /file-dock
 ENTRYPOINT ["openledger-node", "--no-sandbox", "--disable-gpu"]
