@@ -82,7 +82,7 @@ fi
 
 # Install additional dependencies if not already installed
 echo -e "${YELLOW}Checking additional dependencies...${RESET}"
-additional_dependencies=("xorg" "xvfb" "sudo" "docker.io" "lxde" "ffmpeg" "libasound2t64" "libxss1" "libappindicator3-1" "libnss3" "libgtk-3-0" "libx11-xcb1" "libxtst6" "libvpx-dev" "mesa-utils" "libjsoncpp-dev" "libssl-dev" "libcurl4-openssl-dev" "libva2")
+additional_dependencies=("xorg" "xvfb" "sudo" "lxde" "ffmpeg" "libasound2t64" "libxss1" "libappindicator3-1" "libnss3" "libgtk-3-0" "libx11-xcb1" "libxtst6" "libvpx-dev" "mesa-utils" "libjsoncpp-dev" "libssl-dev" "libcurl4-openssl-dev" "libva2")
 for dep in "${additional_dependencies[@]}"; do
     if ! dpkg -l | grep -qw "$dep"; then
         echo -e "${GREEN}Installing $dep...${RESET}"
@@ -109,7 +109,6 @@ RUN apt-get update && apt-get install -y \\
     xorg \\
     xvfb \\
     sudo \\
-    docker.io \\
     lxde \\
     ffmpeg \\
     libasound2t64 \\
