@@ -177,3 +177,6 @@ EOF
 # Final success message
 echo -e "${GREEN}Dockerfile, Docker Compose file, and .env file have been created.${RESET}"
 echo -e "${GREEN}You can now build the Docker container using 'docker-compose up --build'.${RESET}"
+
+# Suggest running the Docker Compose command
+echo -e "${YELLOW}Please run 'docker-compose up --build' from this directory to start the container.${RESET}"
