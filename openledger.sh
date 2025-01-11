@@ -157,7 +157,7 @@ services:
     container_name: openledger-docker
     environment:
       - DISPLAY=${DISPLAY}
-      - OPENLEDGER_VERSION=\${OPENLEDGER_VERSION:-1.0.0}
+      - OPENLEDGER_VERSION=${OPENLEDGER_VERSION:-1.0.0}
     volumes:
       - openledger_data:/file-dock/data
       - /tmp/.X11-unix:/tmp/.X11-unix
